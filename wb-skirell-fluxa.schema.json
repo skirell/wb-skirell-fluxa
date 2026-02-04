@@ -18,11 +18,23 @@
 					"name": {
 						"title": "panel_name_title",
 						"type": "string",
+						"options": {
+							"inputAttributes": {
+								"placeholder":  "panel_name_case"
+							}
+						},
 						"propertyOrder": 1
 					},
 					"id": {
 						"title": "panel_id_title",
 						"type": "string",
+						"pattern": "^[0-9A-Fa-f]{12}$",
+						"options": {
+							"patternmessage": "panel_id_pattern",
+							"inputAttributes": {
+								"placeholder":  "XXXXXXXXXXXX"
+							}
+						},
 						"propertyOrder": 2
 					},
 					"screens": {
@@ -35,11 +47,13 @@
 								"blocks": {
 									"title": "blocks_element",
 									"type": "array",
+									"maxItems": 4,
 									"items": {
 										"title": "blocks_title",
 										"type": "object",
 										"oneOf": [
 											{"$ref": "#/definitions/block_scene"},
+											{"$ref": "#/definitions/block_sensor"},
 											{"$ref": "#/definitions/block_switch"}
 										],
 										"options": {
@@ -75,7 +89,7 @@
 							"enable_array_copy": true,
 							"disable_collapse": true
 						},
-						"_format": "tabs",
+						"_format": "tabs-top",
 						"propertyOrder": 3
 					}
 				},
@@ -148,50 +162,188 @@
 				},
 				"param_1": {
 					"title": "param_1_name",
+					"description": "param_1_desc",
 					"type": "string",
+					"default": "",
 					"options": {
-						"show_opt_in": true
+						"show_opt_in": true,
+						"inputAttributes": {
+							"placeholder": "params_scene_case"
+						}
 					},
 					"propertyOrder": 1
 				},
 				"param_2": {
 					"title": "param_2_name",
+					"description": "param_2_desc",
 					"type": "string",
 					"options": {
-						"show_opt_in": true
+						"show_opt_in": true,
+						"inputAttributes": {
+							"placeholder": "params_scene_case"
+						}
 					},
 					"propertyOrder": 2
 				},
 				"param_3": {
 					"title": "param_3_name",
+					"description": "param_3_desc",
 					"type": "string",
 					"options": {
-						"show_opt_in": true
+						"show_opt_in": true,
+						"inputAttributes": {
+							"placeholder": "params_scene_case"
+						}
 					},
 					"propertyOrder": 3
 				},
 				"icon": {
 					"title": "icon_name",
+					"description": "icon_desc",
 					"type": "string",
 					"minLength": 1,
+					"options": {
+						"inputAttributes": {
+							"placeholder": "icon_scene_case"
+						}
+					},
 					"propertyOrder": 4
 				},
 				"command_topic": {
 					"title": "command_topic_name",
+					"description": "command_topic_desc",
 					"type": "string",
 					"minLength": 1,
+					"options": {
+						"wb": {
+							"data": "devices"
+						}
+					},
 					"_format": "wb-autocomplete",
 					"propertyOrder": 5
 				},
 				"payload": {
 					"title": "payload_name",
+					"description": "payload_desc",
 					"type": "string",
 					"minLength": 1,
+					"default": "1",
+					"options": {
+						"inputAttributes": {
+							"placeholder": "payload_case"
+						}
+					},
 					"propertyOrder": 6
 				}
 			},
-			"required": ["type"]
+			"required": ["type", "icon", "command_topic", "payload"]
 		},
+
+		"block_sensor": {
+			"title": "block_sensor_name",
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"enum": ["sensor"],
+					"options": {"hidden": true}
+				},
+				"param_1": {
+					"title": "param_1_sensor_name",
+					"description": "param_1_sensor_desc",
+					"type": "string",
+					"options": {
+						"show_opt_in": true,
+						"inputAttributes": {
+							"placeholder": "params_sensor_case"
+						}
+					},
+					"propertyOrder": 1
+				},
+				"measure": {
+					"title": "measure_name",
+					"description": "measure_desc",
+					"type": "string",
+					"options": {
+						"show_opt_in": true,
+						"inputAttributes": {
+							"placeholder": "measure_case"
+						}
+					},
+					"format": "select",
+					"propertyOrder": 2
+				},
+				"min": {
+					"title": "min_name",
+					"description": "min_desc",
+					"type": "integer",
+					"default": "",
+					"propertyOrder": 3
+				},
+				"stage_1": {
+					"title": "stage_1_name",
+					"description": "stage_1_desc",
+					"type": "integer",
+					"default": "",
+					"propertyOrder": 4
+				},
+				"stage_2": {
+					"title": "stage_2_name",
+					"description": "stage_2_desc",
+					"type": "integer",
+					"default": "",
+					"propertyOrder": 5
+				},
+				"max": {
+					"title": "max_name",
+					"description": "max_desc",
+					"type": "integer",
+					"default": "",
+					"propertyOrder": 6
+				},
+				"color_1": {
+					"title": "color_1_name",
+					"description": "color_1_desc",
+					"$ref": "#/definitions/color_picker",
+					"default": "color_green",
+					"minLength": 1,
+					"propertyOrder": 7
+				},
+				"color_2": {
+					"title": "color_2_name",
+					"description": "color_2_desc",
+					"type": "string",
+					"$ref": "#/definitions/color_picker",
+					"default": "color_yellow",
+					"minLength": 1,
+					"propertyOrder": 8
+				},
+				"color_3": {
+					"title": "color_3_name",
+					"description": "color_3_desc",
+					"type": "string",
+					"$ref": "#/definitions/color_picker",
+					"default": "color_red",
+					"minLength": 1,
+					"propertyOrder": 9
+				},
+				"state_topic": {
+					"title": "state_topic_name",
+					"description": "state_topic_desc",
+					"type": "string",
+					"minLength": 1,
+					"options": {
+						"wb": {
+							"data": "devices"
+						}
+					},
+					"_format": "wb-autocomplete",
+					"propertyOrder": 10
+				}
+			},
+			"required": ["type", "min", "stage_1", "stage_2", "max", "color_1", "color_2", "color_3", "state_topic"]
+		},
+
 		"block_switch": {
 			"title": "block_switch_name",
 			"type": "object",
@@ -203,34 +355,51 @@
 				},
 				"param_1": {
 					"title": "param_1_name",
+					"description": "param_1_desc",
 					"type": "string",
 					"options": {
-						"show_opt_in": true
+						"show_opt_in": true,
+						"inputAttributes": {
+							"placeholder": "params_switch_case"
+						}
 					},
 					"propertyOrder": 1
 				},
 				"param_2": {
 					"title": "param_2_name",
+					"description": "param_2_desc",
 					"type": "string",
 					"options": {
-						"show_opt_in": true
+						"show_opt_in": true,
+						"inputAttributes": {
+							"placeholder": "params_switch_case"
+						}
 					},
 					"propertyOrder": 2
 				},
 				"icon": {
 					"title": "icon_name",
+					"description": "icon_desc",
 					"type": "string",
 					"minLength": 1,
+					"options": {
+						"inputAttributes": {
+							"placeholder": "icon_switch_case"
+						}
+					},
 					"propertyOrder": 3
 				},
 				"color": {
 					"title": "color_name",
+					"description": "color_desc",
 					"$ref": "#/definitions/color_picker",
+					"default": "color_indigo",
 					"minLength": 1,
 					"propertyOrder": 4
 				},
 				"OnOff_command_topic": {
 					"title": "OnOff_command_topic_name",
+					"description": "OnOff_command_topic_desc",
 					"type": "string",
 					"minLength": 1,
 					"options": {
@@ -243,6 +412,7 @@
 				},
 				"OnOff_state_topic": {
 					"title": "OnOff_state_topic_name",
+					"description": "OnOff_state_topic_desc",
 					"type": "string",
 					"minLength": 1,
 					"options": {
@@ -255,18 +425,32 @@
 				},
 				"payload_on": {
 					"title": "payload_on_name",
+					"description": "payload_on_desc",
 					"type": "string",
 					"minLength": 1,
+					"default": "1",
+					"options": {
+						"inputAttributes": {
+							"placeholder": "payload_on_case"
+						}
+					},
 					"propertyOrder": 7
 				},
 				"payload_off": {
 					"title": "payload_off_name",
+					"description": "payload_off_desc",
 					"type": "string",
 					"minLength": 1,
+					"default": "0",
+					"options": {
+						"inputAttributes": {
+							"placeholder": "payload_off_case"
+						}
+					},
 					"propertyOrder": 8
 				}
 			},
-			"required": ["type", "color"]
+			"required": ["type", "icon", "color", "OnOff_command_topic", "OnOff_state_topic", "payload_on", "payload_off"]
 		}
 	},
 	"options": {
@@ -286,31 +470,56 @@
 
 			"panel_element": "Панель",
 			"panel_name_title": "Наименование панели",
+			"panel_name_case": "пример: Гостиная",
+
 			"panel_id_title": "Индентификатор панели",
+			"panel_id_pattern": "Допустимо использовать только латинские буквы и цифры. Длина строго 12 символов",
 
 			"screens_element": "Страница",
-			"screens_title": "Cтраницы",
+			"screens_title": "Отображаемые страницы",
 
-			"blocks_element": "Блоки на странице",
+			"blocks_element": "Блоки (макс. 4)",
 			"blocks_title": "Блок",
 
 			"block_scene_name": "Сценарий",
+			"block_sensor_name": "Датчик",
 			"block_switch_name": "Переключатель",
 
-			"param_1_name": "Первый блок текста",
-			"param_2_name": "Второй блок текста",
-			"param_3_name": "Третий блок текста",
+			"param_1_name": "Первый блок текста (маленький размер)",
+			"param_1_desc": "Используется для отображения текста в самом блоке",
+	
+			"param_2_name": "Второй блок текста (средний размер)",
+			"param_2_desc": "Используется для отображения текста в самом блоке",
+
+			"param_3_name": "Третий блок текста (большой размер)",
+			"param_3_desc": "Используется для отображения текста в самом блоке",
+
+			"params_scene_case": "пример: название сценария, комнаты, режима или любой другой текст",
+			"params_sensor_case": "пример: температура, влажность",
+			"params_switch_case": "пример: название переключателя, комнаты, режима или любой другой текст",
+
+			"icon_scene_case": "пример: weather-night",
+			"icon_switch_case": "пример: fan",
 
 			"icon_name": "Иконка, отображаемая в блоке",
+			"icon_desc": "Поддерживается широкий выбор иконок из набора <a href='https://pictogrammers.com/library/mdi' target='_blank'>Material Design Icons (MDI)</a>",
 
 			"color_name": "Цвет блока в активном состоянии",
+			"color_desc": "Используется как цвет для активного состояния устройства <i>(при состояние включен)</i>, стандартный серый цвет <i>(при состояние выключен)</i>",
+
 
 			"command_topic_name": "Топик для отправки команды",
+			"command_topic_desc": "Командный MQTT-топик, в который будет отправляться сообщение (команда) при нажатии на блок",
 
 			"payload_name": "Команда (сообщение) для отправки",
+			"payload_desc": "Значение, отправляемое в командный MQTT-топик при нажатии на блок",
+			"payload_case": "пример: 1",
 
 			"OnOff_command_topic_name": "Топик для отправки команды",
+			"OnOff_command_topic_desc": "Командный MQTT-топик, в который будет отправляться сообщение (команда) при нажатии на блок",
+
 			"OnOff_state_topic_name": "Топик для получения команды",
+			"OnOff_state_topic_desc": "MQTT-топик обратной связи, откуда будет приходить сообщения о включении или выключении устройства",
 
 			"payload_on_name": "Команда включения",
 			"payload_on_desc": "Сообщение (команда) для включения",
@@ -319,6 +528,40 @@
 			"payload_off_name": "Команда выключения",
 			"payload_off_desc": "Сообщение (команда) для выключения",
 			"payload_off_case": "примыер: 0 или false или OFF",
+
+			"param_1_sensor_name": "Название датчика",
+			"param_1_sensor_desc": "Используется для изменения текста в самом блоке. Может применяться и в других целях",
+
+			"measure_name": "Единицы измерения",
+			"measure_desc": "Используется для изменения текста в самом блоке. Может применяться и в других целях",
+			"measure_case": "пример: °C или % или ppm или ppb",
+
+			"min_name": "Минимальная граница шкалы для цветового индикатора",
+			"min_desc": "Задаёт минимальное значение в самом блоке",
+
+			"stage_1_name": "Первая граница шкалы для цветового индикатора",
+			"stage_1_desc": "Используется для определения цветового состояния кругового индикатора при сравнении с текущим значением датчика",
+
+			"stage_2_name": "Вторая граница шкалы для цветового индикатора",
+			"stage_2_desc": "Используется для определения цветового состояния кругового индикатора при сравнении с текущим значением датчика",
+
+			"max_name": "Максимальная граница для шкалы цветового индикатора",
+			"max_desc": "Задаёт максимальное значение в самом блоке",
+
+			"color_1_name": "Цвет индикатора для значений ниже <u>первой границы</u>",
+			"color_1_desc": "Используется для определения цветового состояния кругового индикатора при сравнении с текущим значением датчика",
+
+			"color_2_name": "Цвет индикатора для значений между <u>первой</u> и <u>второй границей</u>",
+			"color_2_desc": "Используется для определения цветового состояния кругового индикатора при сравнении с текущим значением датчика",
+
+			"color_3_name": "Цвет индикатора для значений выше <u>второй границы</u>",
+			"color_3_desc": "Используется для определения цветового состояния кругового индикатора при сравнении с текущим значением датчика",
+
+			"state_topic_name": "Топик для получения данных",
+			"state_topic_desc": "MQTT-топик обратной связи, от куда приходят показания от датчика",
+
+			"setting_name": "Название устройства в настройках",
+			"setting_name_desc": "Используется для изменения текста заголовка на странице управления устройством",
 
 			"Red": "Красный",
 			"Pink": "Розовый",
