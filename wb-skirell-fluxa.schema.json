@@ -12,6 +12,7 @@
 	"properties": {
 		"panels": {
 			"type": "array",
+			"description": "panels_desc",
 			"items": {
 				"headerTemplate": "panel_title",
 				"title": "panel_element",
@@ -1722,9 +1723,10 @@
 		"ru": {
 			"config_title": "Конфигуратор панелей Skirell Fluxa",
 
-			"style": "<- css inject -><style>h3.je-header label abbr { font-size: var(--font-size-medium) } abbr.dash { display: inline-block; border-bottom: 1px dashed }</style>",
+			"style": "<- css inject -><style>h3.je-header label abbr { font-size: var(--font-size-medium) } abbr.dash { display: inline-block; border-bottom: 1px dashed } abbr.solid { border-bottom: 1px solid }</style>",
 
-			"panel_title": "{{ self.name }} ({{ self.id }}) {{ self.link }}",
+			"panels_desc": "<p class='alert alert-success'>При открытии конфигуратора (через F5) происходит авто-добавление панелей в список. При сохранении – загрузка конфигураций на доступные панели.</p>",
+			"panel_title": "{{ self.name | ·}} {{ self.id }} {{ self.link }}",
 
 			"panel_element": "Панель",
 			"panel_name_title": "Наименование панели",
@@ -1746,11 +1748,11 @@
 			"block_sensor_name": "Датчик",
 			"block_switch_name": "Переключатель",
 
-			"topic_format": "формат: device/control или полный топик mqtt",
+			"topic_format": "формат: device/control или полный топик с брокера",
 
 			"param_1_name": "Первый блок текста (малый размер)",
 			"param_1_desc": "Используется для отображения текста в самом блоке",
-	
+
 			"param_2_name": "Второй блок текста (средний размер)",
 			"param_2_desc": "Используется для отображения текста в самом блоке",
 
@@ -1764,14 +1766,14 @@
 			"params_sensor_case": "пример: температура · влажность",
 			"params_switch_case": "пример: название переключателя · комнаты · режима · любой другой текст",
 
+			"icon_name": "Иконка, отображаемая в блоке",
+			"icon_desc": "Поддерживается набор иконок <a href='https://pictogrammers.com/library/mdi' target='_blank'>Material Design Icons (MDI)</a>",
+
 			"icon_scene_case": "пример: weather-night",
 			"icon_light_case": "пример: floor-lamp",
 			"icon_climate_case": "пример: air-conditioner",
 			"icon_sensors_case": "пример: fire · snowflake",
 			"icon_switch_case": "пример: fan",
-
-			"icon_name": "Иконка, отображаемая в блоке",
-			"icon_desc": "Поддерживается широкий выбор иконок из набора <a href='https://pictogrammers.com/library/mdi' target='_blank'>Material Design Icons (MDI)</a>",
 
 			"color_name": "Цвет блока в активном состоянии",
 			"color_desc": "Используется как цвет активного состояния устройства, серый цвет – неактивно <style>option[value='color_red']{color: #FF4D4D} option[value='color_pink']{color: #FF3D5E} option[value='color_orange']{color: #FF974D} option[value='color_yellow']{color: #FFE14D} option[value='color_mint']{color: #4DFFA6}option[value='color_green']{color: #4DFF5B} option[value='color_cyan']{color: #4DFFF0} option[value='color_blue']{color: #4DC3FF} option[value='color_dark_blue']{color: #3D6EFF} option[value='color_indigo']{color: #5D3DFF} option[value='color_purple']{color: #AE3DFF} option[value='color_brown']{color: #B34A00}</style>",
@@ -1783,19 +1785,19 @@
 			"payload_desc": "Значение, отправляемое в командный топик при нажатии на блок",
 			"payload_case": "пример: 1",
 
+			"payload_on_name": "Команда включения",
+			"payload_on_desc": "Сообщение (значение) для включения",
+			"payload_on_case": "пример: 1 · true · ON",
+
+			"payload_off_name": "Команда выключения",
+			"payload_off_desc": "Сообщение (значение) для выключения",
+			"payload_off_case": "примыер: 0 · false · OFF",
+
 			"OnOff_command_topic_name": "Топик для отправки команды",
 			"OnOff_command_topic_desc": "Командный топик, в который отправляется значение при нажатии на блок",
 
 			"OnOff_state_topic_name": "Топик для получения команды",
 			"OnOff_state_topic_desc": "Топик обратной связи, куда будет приходить состояние устройства",
-
-			"payload_on_name": "Команда включения",
-			"payload_on_desc": "Сообщение (команда) для включения",
-			"payload_on_case": "пример: 1 · true · ON",
-
-			"payload_off_name": "Команда выключения",
-			"payload_off_desc": "Сообщение (команда) для выключения",
-			"payload_off_case": "примыер: 0 · false · OFF",
 
 			"param_1_sensor_name": "Название датчика",
 			"param_1_sensor_desc": "Используется для изменения текста в самом блоке",
@@ -1808,14 +1810,14 @@
 			"min_name": "Минимальная граница шкалы для цветового индикатора",
 			"min_desc": "Задаёт минимальное значение в самом блоке",
 
+			"max_name": "Максимальная граница для шкалы цветового индикатора",
+			"max_desc": "Задаёт максимальное значение в самом блоке",
+
 			"stage_1_name": "Первая граница шкалы для цветового индикатора",
 			"stage_1_desc": "Используется для определения цветового состояния кругового индикатора при сравнении с текущим значением датчика",
 
 			"stage_2_name": "Вторая граница шкалы для цветового индикатора",
 			"stage_2_desc": "Используется для определения цветового состояния кругового индикатора при сравнении с текущим значением датчика",
-
-			"max_name": "Максимальная граница для шкалы цветового индикатора",
-			"max_desc": "Задаёт максимальное значение в самом блоке",
 
 			"color_1_name": "Цвет индикатора для значений ниже <u>первой границы</u>",
 			"color_1_desc": "Используется для определения цветового состояния кругового индикатора при сравнении с текущим значением датчика",
@@ -1857,7 +1859,7 @@
 			"color_command_topic_desc": "Командный топик, куда отправляется значение выбранного цвета",
 
 			"color_type_name": "Формат цвета",
-			"color_type_desc": "Описание: RGB (255;0;0), HEX (#FFFFFF), HSV (255;100;100), HSL (255;100;100)",
+			"color_type_desc": "RGB (255;0;0) · HEX (#FFFFFF) · HSV (255;100;100) · HSL (255;100;100)",
 
 			"temp_command_topic_name": "Топик для отправки температуры",
 			"temp_command_topic_desc": "Командный топик, куда отправляется новое значение температуры света",
@@ -1866,11 +1868,11 @@
 			"temp_state_topic_desc": "Топик обратной связи, от куда приходит значение температуры света",
 
 			"min_temp_name": "Минимальная температура",
-			"min_temp_desc": "Минимальное значение температуры света для целевого устройства",
+			"min_temp_desc": "Минимальное значение температуры света у целевого устройства",
 			"min_temp_case": "пример: 0 · 2700",
 
 			"max_temp_name": "Максимальная температура",
-			"max_temp_desc": "Максимальное значение температуры света для целевого устройства",
+			"max_temp_desc": "Максимальное значение температуры света у целевого устройства",
 			"max_temp_case": "пример: 100 · 6500",
 
 			"temp_measure_name": "Единица измерения температуры",
@@ -1917,10 +1919,10 @@
 			"fan_modes_desc": "Доп. режим",
 			"fan_modes_payload_case": "пример: 0 · 1 · 2",
 
-			"modes_title_name": "Названия режима, отображаемого в настройках",
+			"modes_title_name": "Название режима, отображаемого в настройках",
 			"modes_title_case": "пример: Авто · нагрев · охлаждение",
 			"modes_color_name": "Цвет кругового ползунка при выборе режима",
-			"modes_payload_name": "Cообщение (команда) на прием или отправку в топик",
+			"modes_payload_name": "Cообщение (команда) на приём или отправку в топик",
 			"modes_payload_case": "пример: auto · heat · cool",
 
 			"sensors_name": "<abbr>Датчики устройства <i>(поддерживается отображение до 3-х датчиков)</i></abbr>",
@@ -1984,7 +1986,7 @@
 			"help_position_close_desc": "Порог для округления до минимальной позиции",
 			"help_position_close_case": "пример: 5",
 
-			"lameli_name": "<abbr class='dash' style='margin-bottom: 10px'>Добавить управление ламелями</abbr>",
+			"lameli_name": "<abbr class='dash' style='margin-bottom: 10px'>Добавить возможность управлять ламелями</abbr>",
 
 			"Red": "Красный",
 			"Pink": "Розовый",

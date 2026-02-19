@@ -6,6 +6,7 @@ import sys
 import json
 import hashlib
 import requests
+import subprocess
 
 from cgi import FieldStorage
 
@@ -80,9 +81,9 @@ def process_topics(object):
 
 			if '_topic' in key and (match := re.match(r'^([^/+#]+)/([^/+#]+)$', topic)):
 				if 'state_' in key:
-					object[key] = "/devices/{}/controls/{}".format(match.group(1), match.group(2))
+					object[key] = '/devices/{}/controls/{}'.format(match.group(1), match.group(2))
 				elif 'command_' in key:
-					object[key] = "/devices/{}/controls/{}/on".format(match.group(1), match.group(2))
+					object[key] = '/devices/{}/controls/{}/on'.format(match.group(1), match.group(2))
 
 			if key.startswith('icon'):
 				name = object[key]
@@ -106,6 +107,16 @@ def find_devices():
 
 	for index, panel in enumerate(data.get('panels', [])):
 		data['panels'][index]['link'] = link.format(panel.get('id'))
+
+	try:
+		command = 'timeout 1 mosquitto_sub -v -t /devices/+/controls/id/meta/type | grep -oP "Skirell-Fluxa-\\K[0-9A-F]+"'
+		devices = subprocess.run(command, shell=True, capture_output=True, text=True, check=True).stdout
+	except subprocess.CalledProcessError as error:
+		pass
+	else:
+		for id in devices.splitlines():
+			if not any(panel.get('id') == id for panel in data.get('panels', [])):
+				data['panels'].append({'id': id, 'name': '', 'screens': []})
 
 	json.dump(data, sys.stdout, ensure_ascii=False, indent=4)
 
