@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 import os
+import io
 import re
 import sys
 import json
+import copy
 import hashlib
 import requests
 import subprocess
@@ -123,40 +125,58 @@ def find_devices():
 def update_checksum():
 	data = json.loads(sys.stdin.read())
 
+	adresses = {}
+
+	try:
+		command = 'timeout 1 mosquitto_sub -v -t /devices/+/controls/ip | grep -oP "Skirell-Fluxa-\K[0-9A-F]+|[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"'
+		devices = subprocess.run(command, shell=True, capture_output=True, text=True, check=True).stdout
+	except subprocess.CalledProcessError as error:
+		pass
+	else:
+		lines = devices.splitlines()
+
+		for i in range(0, len(lines), 2):
+			key = lines[i]
+			value = lines[i+1] if i+1 < len(lines) else ''
+			adresses[key] = value
+
 	for index, panel in enumerate(data.get('panels', [])):
 		screens = panel.get('screens', [])
-
 		hash = hashlib.md5(json.dumps({'screens': screens}).encode('utf-8')).hexdigest()
 
 		if panel.get('crc') is None or panel['crc'] != hash:
 			data['panels'][index]['crc'] = hash
 
+			config = generate_json(copy.deepcopy(screens))
+			target = adresses.get(panel.get('id'))
+
+			if config and target:
+				try:
+					check = requests.get(f'http://{target}/', timeout=2)
+
+					if check.status_code == 200:
+						try:
+							response = requests.post(
+								url=f'http://{target}/upload',
+								files={'file': ('data.json', io.BytesIO(json.dumps(config).encode('utf-8')), 'application/json')}
+							)
+						except Exception as error: pass
+				except requests.RequestException:
+					pass
+
 		if panel.get('link'): del panel['link']
 
 	json.dump(data, sys.stdout, ensure_ascii=False, indent=4)
 
-def generate_json(id):
-	try:
-		with open(CONFIG_FILE_PATH, 'r', encoding='utf-8') as file:
-			data = json.load(file)
-	except Exception as error:
-		send_response('500 Internal Server Error', 'text/html', HTML_TEMPLATE.replace('%s', f"{error}"))
-		sys.exit(1)
-
-	try:
-		with open(SCHEMA_FILE_PATH, 'r', encoding='utf-8') as file:
-			schema = json.load(file).get('definitions', {})
-	except Exception as error:
-		send_response('500 Internal Server Error', 'text/html', HTML_TEMPLATE.replace('%s', f"{error}"))
-		sys.exit(1)
-
-	screens = []
-
-	for panel in data.get('panels', []):
-		if id.upper() == panel.get('id', '').upper():
-			screens.extend(panel.get('screens', []))
-
+def generate_json(screens):
 	if len(screens):
+		try:
+			with open(SCHEMA_FILE_PATH, 'r', encoding='utf-8') as file:
+				schema = json.load(file).get('definitions', {})
+		except Exception as error:
+			send_response('500 Internal Server Error', 'text/html', HTML_TEMPLATE.replace('%s', f"{error}"))
+			sys.exit(1)
+
 		for i, screen in enumerate(screens, start=1):
 			page = {'page': i}
 			page.update(screen)
@@ -196,10 +216,25 @@ def generate_json(id):
 
 					block['data'] = process_topics(data)
 					page['blocks'][j - 1] = block
-
 		return {'screens': screens}
 	else:
 		return
+
+def generate_file(id):
+	try:
+		with open(CONFIG_FILE_PATH, 'r', encoding='utf-8') as file:
+			data = json.load(file)
+	except Exception as error:
+		send_response('500 Internal Server Error', 'text/html', HTML_TEMPLATE.replace('%s', f"{error}"))
+		sys.exit(1)
+
+	screens = []
+
+	for panel in data.get('panels', []):
+		if id.upper() == panel.get('id', '').upper():
+			screens.extend(panel.get('screens', []))
+
+	return generate_json(screens)
 
 if __name__ == "__main__":
 
@@ -222,7 +257,7 @@ if __name__ == "__main__":
 			if not re.match(r"^[0-9A-Fa-f]{12}$", id):
 				send_response('400 Bad Request', 'text/html', HTML_TEMPLATE.replace('%s', 'Указан некорректный ID панели!'))
 			else:
-				if (data := generate_json(id)):
+				if (data := generate_file(id)):
 					send_response('200 OK', 'application/octet-stream', None, id)
 					json.dump(data, sys.stdout, ensure_ascii=False, indent=2)
 				else:

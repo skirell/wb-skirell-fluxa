@@ -2,7 +2,7 @@
 	"$schema": "http://json-schema.org/draft-04/schema#",
 	"type": "object",
 	"title": "config_title",
-
+	"description": "config_desc",
 	"configFile": {
 		"path": "/etc/wb-skirell-fluxa.conf",
 		"toJSON": ["/usr/lib/cgi-bin/skirell-fluxa.py", "-load"],
@@ -12,7 +12,7 @@
 	"properties": {
 		"panels": {
 			"type": "array",
-			"description": "panels_desc",
+			"uniqueItems": true,
 			"items": {
 				"headerTemplate": "panel_title",
 				"title": "panel_element",
@@ -55,7 +55,7 @@
 								"blocks": {
 									"title": "blocks_element",
 									"type": "array",
-									"maxItems": 4,
+									"maxItems": 6,
 									"items": {
 										"title": "blocks_title",
 										"type": "object",
@@ -1207,7 +1207,7 @@
 							"type": "string",
 							"minLength": 1,
 							"options": {
-								"inputAttributes": {"placeholder": "topic_format"},
+								"inpbutes": {"placeholder": "topic_format"},
 								"wb": {"data": "devices"},
 								"grid_columns": 4
 							},
@@ -1722,10 +1722,10 @@
 		},
 		"ru": {
 			"config_title": "Конфигуратор панелей Skirell Fluxa",
+			"config_desc": "<p class='alert alert-success'>При открытии конфигуратора (через F5) происходит авто-добавление панелей в список. При сохранении – загрузка конфигураций на доступные панели.</p>",
 
 			"style": "<- css inject -><style>h3.je-header label abbr { font-size: var(--font-size-medium) } abbr.dash { display: inline-block; border-bottom: 1px dashed } abbr.solid { border-bottom: 1px solid }</style>",
 
-			"panels_desc": "<p class='alert alert-success'>При открытии конфигуратора (через F5) происходит авто-добавление панелей в список. При сохранении – загрузка конфигураций на доступные панели.</p>",
 			"panel_title": "{{ self.name | ·}} {{ self.id }} {{ self.link }}",
 
 			"panel_element": "Панель",
@@ -1738,7 +1738,7 @@
 			"screens_element": "Страница",
 			"screens_title": "Отображаемые страницы",
 
-			"blocks_element": "Блоки (макс. 4)",
+			"blocks_element": "Блоки (макс. 6)",
 			"blocks_title": "Блок",
 
 			"block_scene_name": "Сценарий",
