@@ -6,24 +6,25 @@
 	"configFile": {
 		"path": "/etc/wb-skirell-fluxa.conf",
 		"toJSON": ["/usr/lib/cgi-bin/skirell-fluxa.py", "-load"],
-		"fromJSON": ["/usr/lib/cgi-bin/skirell-fluxa.py", "-save"]
+		"fromJSON": ["/usr/lib/cgi-bin/skirell-fluxa.py", "-save"],
+		"needReload": true,
+		"hide": false
 	},
 
 	"properties": {
 		"panels": {
 			"type": "array",
-			"uniqueItems": true,
 			"items": {
 				"headerTemplate": "panel_title",
 				"title": "panel_element",
 				"type": "object",
 				"properties": {
 					"crc": {
-						"description": "style",
 						"type": "string",
 						"options": {"hidden": true}
 					},
 					"link": {
+						"description": "style",
 						"type": "string",
 						"options": {"hidden": true}
 					},
@@ -44,6 +45,20 @@
 							"inputAttributes": {"placeholder":  "XXXXXXXXXXXX"}
 						},
 						"propertyOrder": 2
+					},
+					"upload": {
+						"title": "panel_upload_title",
+						"anyOf": [
+							{"type": "string", "enum": ["no ip-address", "no connection", "trasfer fail"]},
+							{"type": "string", "options": {"keep_oneof_values": false}}
+						],
+						"options": {
+							"enum_titles": ["error: no ip-address", "error: no connection", "error: trasfer fail"],
+							"inputAttributes": {"placeholder":  "panel_upload_case"}
+						},
+						"default": "",
+						"readonly": true,
+						"propertyOrder": 3
 					},
 					"screens": {
 						"title": "screens_title",
@@ -97,7 +112,7 @@
 							"disable_collapse": true
 						},
 						"_format": "tabs-top",
-						"propertyOrder": 3
+						"propertyOrder": 4
 					}
 				},
 				"options": {
@@ -117,6 +132,7 @@
                     "disable_panel": true
                 }
 			},
+			"uniqueItems": true,
 			"_format": "wb-multiple"
 		}
 	},
@@ -1724,7 +1740,7 @@
 			"config_title": "Конфигуратор панелей Skirell Fluxa",
 			"config_desc": "<p class='alert alert-success'>При открытии конфигуратора (через F5) происходит авто-добавление панелей в список. При сохранении – загрузка конфигураций на доступные панели.</p>",
 
-			"style": "<- css inject -><style>h3.je-header label abbr { font-size: var(--font-size-medium) } abbr.dash { display: inline-block; border-bottom: 1px dashed } abbr.solid { border-bottom: 1px solid }</style>",
+			"style": "<- css inject -><style>h3.je-header label abbr { font-size: var(--font-size-medium) } abbr.dash { display: inline-block; border-bottom: 1px dashed } abbr.solid { border-bottom: 1px solid } [data-schemapath*='.upload'] > select {display: none}</style>",
 
 			"panel_title": "{{ self.name | ·}} {{ self.id }} {{ self.link }}",
 
@@ -1734,6 +1750,13 @@
 
 			"panel_id_title": "Индентификатор панели",
 			"panel_id_pattern": "Допустимо использовать только латинские буквы и цифры. Длина строго 12 символов",
+
+			"panel_upload_title": "Последняя выгрузка",
+			"panel_upload_case": "ещё не производилась",
+
+			"error: no ip-address": "не найден ip-адрес панели",
+			"error: no connection": "панель недоступна",
+			"error: trasfer fail": "ошибка при передаче",
 
 			"screens_element": "Страница",
 			"screens_title": "Отображаемые страницы",

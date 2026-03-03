@@ -11,6 +11,7 @@ import requests
 import subprocess
 
 from cgi import FieldStorage
+from datetime import datetime
 
 ICONDB_FILE_PATH = "/usr/lib/cgi-bin/skirell-icons.json"
 CONFIG_FILE_PATH = "/etc/wb-skirell-fluxa.conf"
@@ -118,7 +119,7 @@ def find_devices():
 	else:
 		for id in devices.splitlines():
 			if not any(panel.get('id') == id for panel in data.get('panels', [])):
-				data['panels'].append({'id': id, 'name': '', 'screens': []})
+				data['panels'].append({'id': id, 'name': '', 'upload': '', 'screens': []})
 
 	json.dump(data, sys.stdout, ensure_ascii=False, indent=4)
 
@@ -145,12 +146,14 @@ def update_checksum():
 		hash = hashlib.md5(json.dumps({'screens': screens}).encode('utf-8')).hexdigest()
 
 		if panel.get('crc') is None or panel['crc'] != hash:
-			data['panels'][index]['crc'] = hash
-
 			config = generate_json(copy.deepcopy(screens))
 			target = adresses.get(panel.get('id'))
 
-			if config and target:
+			if config is None:
+				panel['upload'] = ''
+			elif not target:
+				panel['upload'] = 'no ip-address'
+			else:
 				try:
 					check = requests.get(f'http://{target}/', timeout=2)
 
@@ -160,9 +163,17 @@ def update_checksum():
 								url=f'http://{target}/upload',
 								files={'file': ('data.json', io.BytesIO(json.dumps(config).encode('utf-8')), 'application/json')}
 							)
+
+							if response.status_code == 200:
+								panel['upload'] = datetime.now().strftime('%d.%m.%Y %H:%M:%S')
+								panel['crc'] = hash
+							else:
+								panel['upload'] = 'trasfer fail'
+
 						except Exception as error: pass
-				except requests.RequestException:
-					pass
+					else:
+						panel['upload'] = 'no connection'
+				except requests.RequestException: pass
 
 		if panel.get('link'): del panel['link']
 
@@ -174,7 +185,7 @@ def generate_json(screens):
 			with open(SCHEMA_FILE_PATH, 'r', encoding='utf-8') as file:
 				schema = json.load(file).get('definitions', {})
 		except Exception as error:
-			send_response('500 Internal Server Error', 'text/html', HTML_TEMPLATE.replace('%s', f"{error}"))
+			send_response('500 Internal Server Error', 'text/html', HTML_TEMPLATE.replace('%s', f"SCHEMA: {error}"))
 			sys.exit(1)
 
 		for i, screen in enumerate(screens, start=1):
@@ -225,7 +236,7 @@ def generate_file(id):
 		with open(CONFIG_FILE_PATH, 'r', encoding='utf-8') as file:
 			data = json.load(file)
 	except Exception as error:
-		send_response('500 Internal Server Error', 'text/html', HTML_TEMPLATE.replace('%s', f"{error}"))
+		send_response('500 Internal Server Error', 'text/html', HTML_TEMPLATE.replace('%s', f"CONFIG: {error}"))
 		sys.exit(1)
 
 	screens = []
