@@ -13,9 +13,9 @@ import subprocess
 from cgi import FieldStorage
 from datetime import datetime
 
-ICONDB_FILE_PATH = "/usr/lib/cgi-bin/skirell-icons.json"
-CONFIG_FILE_PATH = "/etc/wb-skirell-fluxa.conf"
-SCHEMA_FILE_PATH = "/usr/share/wb-mqtt-confed/schemas/wb-skirell-fluxa.schema.json"
+ICONDB_FILE_PATH = '/usr/lib/cgi-bin/skirell-icons.json'
+CONFIG_FILE_PATH = '/etc/wb-skirell-fluxa.conf'
+SCHEMA_FILE_PATH = '/usr/share/wb-mqtt-confed/schemas/wb-skirell-fluxa.schema.json'
  
 HTML_TEMPLATE = """<!DOCTYPE html>
 <html lang="ru">
@@ -39,10 +39,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 </html>"""
 
 icons = None
+glyph = None
+place = {}
 
 def update_icons_file():
 	packs = {
-		"https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css": r'\.(mdi-[a-z0-9-]+)::before\s*\{\s*content:\s*"\\?([a-fA-F0-9]+)"\s*\}'
+		'https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css': r'\.(mdi-[a-z0-9-]+)::before\s*\{\s*content:\s*"\\?([a-fA-F0-9]+)"\s*\}'
 	}
 
 	result = {}
@@ -108,8 +110,8 @@ def find_devices():
 	link = "<a href='./fluxa/{}' target='_blank' style='vertical-align: middle; margin-left: 5px' class='text-muted' title='Скачать'><i class='glyphicon glyphicon-save'></i></a>"
 	data = json.loads(sys.stdin.read())
 
-	for index, panel in enumerate(data.get('panels', [])):
-		data['panels'][index]['link'] = link.format(panel.get('id'))
+	for i, panel in enumerate(data.get('panels', [])):
+		data['panels'][i]['link'] = link.format(panel.get('id'))
 
 	try:
 		command = 'timeout 1 mosquitto_sub -v -t /devices/+/controls/id/meta/type | grep -oP "Skirell-Fluxa-\\K[0-9A-F]+"'
@@ -119,35 +121,25 @@ def find_devices():
 	else:
 		for id in devices.splitlines():
 			if not any(panel.get('id') == id for panel in data.get('panels', [])):
-				data['panels'].append({'id': id, 'name': '', 'upload': '', 'screens': []})
+				if (config := import_config(place[id])):
+					crc = hashlib.md5(json.dumps({'screens': config}, sort_keys=True).encode('utf-8')).hexdigest()
+
+					data['panels'].append({'id': id, 'name': '', 'upload': '', 'screens': config, 'crc': crc})
+				else:
+					data['panels'].append({'id': id, 'name': '', 'upload': '', 'screens': [], 'crc': ''})
 
 	json.dump(data, sys.stdout, ensure_ascii=False, indent=4)
 
 def update_checksum():
 	data = json.loads(sys.stdin.read())
 
-	adresses = {}
-
-	try:
-		command = 'timeout 1 mosquitto_sub -v -t /devices/+/controls/ip | grep -oP "Skirell-Fluxa-\K[0-9A-F]+|[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"'
-		devices = subprocess.run(command, shell=True, capture_output=True, text=True, check=True).stdout
-	except subprocess.CalledProcessError as error:
-		pass
-	else:
-		lines = devices.splitlines()
-
-		for i in range(0, len(lines), 2):
-			key = lines[i]
-			value = lines[i+1] if i+1 < len(lines) else ''
-			adresses[key] = value
-
-	for index, panel in enumerate(data.get('panels', [])):
+	for i, panel in enumerate(data.get('panels', [])):
 		screens = panel.get('screens', [])
-		hash = hashlib.md5(json.dumps({'screens': screens}).encode('utf-8')).hexdigest()
+		hash = hashlib.md5(json.dumps({'screens': screens}, sort_keys=True).encode('utf-8')).hexdigest()
 
 		if panel.get('crc') is None or panel['crc'] != hash:
 			config = generate_json(copy.deepcopy(screens))
-			target = adresses.get(panel.get('id'))
+			target = place.get(panel.get('id'))
 
 			if config is None:
 				panel['upload'] = ''
@@ -161,6 +153,7 @@ def update_checksum():
 						try:
 							response = requests.post(
 								url=f'http://{target}/upload',
+								data={'refresh': 'true'},
 								files={'file': ('data.json', io.BytesIO(json.dumps(config).encode('utf-8')), 'application/json')}
 							)
 
@@ -247,13 +240,89 @@ def generate_file(id):
 
 	return generate_json(screens)
 
+def import_config(url):
+	def clean_element(value, key=None):
+		if isinstance(value, dict):
+			return {k: clean_element(v, k) for k, v in value.items() if v is not None}
+		elif isinstance(value, list):
+			return [clean_element(i) for i in value if i is not None]
+		else:
+			if '_topic' in key and (match := re.search(r'/devices/([^/]+)/controls/([^/]+)', value)):
+				value = '{}/{}'.format(match.group(1), match.group(2))
+
+			if 'icon' in key:
+				value = format(ord(value), 'X')
+				value = glyph.get(value, 'mdi-border-radius')
+				value = value.replace('mdi-', '')
+
+			return value
+
+	try:
+		check = requests.get(f'http://{url}', timeout=2)
+		
+		if check.status_code == 200:
+			try:
+				response = requests.get(f'http://{url}/download')
+				
+				if response.status_code == 200:
+					data = response.json()
+
+					for screen in data['screens']:
+						if 'page' in screen:
+							del screen['page']
+
+						if 'blocks' in screen:
+							for i, block in enumerate(screen['blocks']):
+
+								if 'block' in block:
+									del block['block']
+
+								if 'data' in block:
+									block.update(block.get('data', {}))
+
+									del block['data']
+
+								if 'variant' in block:
+									variant = block['variant']
+
+									if isinstance(variant, dict):
+										for item in ['fan_modes', 'modes', 'sensors']:
+											if item in variant and isinstance(variant[item], dict):
+												variant[item] = list(variant[item].values())
+
+									variant['type'] = block.get('variant_type', '')
+
+								screen['blocks'][i] = clean_element(block)
+					return data['screens']
+			except requests.RequestException:
+				return []
+			except json.JSONDecodeError:
+				return []
+	except requests.RequestException: pass
+
+	return []
+
 if __name__ == "__main__":
 
 	try:
 		with open(ICONDB_FILE_PATH, 'r', encoding='utf-8') as file:
 			icons = json.load(file)
+			glyph = {v: k for k, v in icons.items()}
 	except Exception as error:
 		pass
+
+	try:
+		command = 'timeout 1 mosquitto_sub -v -t /devices/+/controls/ip | grep -oP "Skirell-Fluxa-\K[0-9A-F]+|[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"'
+		devices = subprocess.run(command, shell=True, capture_output=True, text=True, check=True).stdout
+	except subprocess.CalledProcessError as error:
+		pass
+	else:
+		lines = devices.splitlines()
+
+		for i in range(0, len(lines), 2):
+			key = lines[i]
+			value = lines[i+1] if i+1 < len(lines) else ''
+			place[key] = value
 
 	if len(sys.argv) > 1 and sys.argv[1] == '-icons':
 		update_icons_file()

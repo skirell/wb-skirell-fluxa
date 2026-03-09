@@ -21,10 +21,10 @@
 				"properties": {
 					"crc": {
 						"type": "string",
+						"description": "style",
 						"options": {"hidden": true}
 					},
 					"link": {
-						"description": "style",
 						"type": "string",
 						"options": {"hidden": true}
 					},
@@ -761,7 +761,8 @@
 						"min_target": {
 							"title": "min_target_name",
 							"description": "min_target_desc",
-							"type": "integer",
+							"type": "string",
+							"pattern": "^-?\\d+(\\.\\d+)?$",
 							"default": "10",
 							"options": {
 								"inputAttributes": {"placeholder": "min_target_case"},
@@ -772,7 +773,9 @@
 						"max_target": {
 							"title": "max_target_name",
 							"description": "max_target_desc",
-							"type": "integer",
+							"type": "string",
+							"pattern": "^-?\\d+(\\.\\d+)?$",
+							"minLength": 1,
 							"default": "30",		
 							"options": {
 								"inputAttributes": {"placeholder": "max_target_case"},
@@ -784,7 +787,6 @@
 							"title": "mode_command_topic_name",
 							"description": "mode_command_topic_desc",
 							"type": "string",
-							"minLength": 1,
 							"options": {
 								"dependencies": {"type": ["climate_variant_cond"]},
 								"inputAttributes": {"placeholder": "topic_format"},
@@ -1738,7 +1740,7 @@
 		},
 		"ru": {
 			"config_title": "Конфигуратор панелей Skirell Fluxa",
-			"config_desc": "<p class='alert alert-success'>При открытии конфигуратора (через F5) происходит авто-добавление панелей в список. При сохранении – загрузка конфигураций на доступные панели.</p>",
+			"config_desc": "<p class='alert alert-success'>При открытии конфигуратора происходит авто-добавление панелей в список с загрузкой текущей конфигурации (до тех пор пока подключены к брокеру).<br>При сохранении – загрузка измененных конфигураций на доступные в сети панели. Аттрибут «последняя выгрузка» отображает последний известный статус.</p>",
 
 			"style": "<- css inject -><style>h3.je-header label abbr { font-size: var(--font-size-medium) } abbr.dash { display: inline-block; border-bottom: 1px dashed } abbr.solid { border-bottom: 1px solid } [data-schemapath*='.upload'] > select {display: none}</style>",
 
