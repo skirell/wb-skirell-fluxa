@@ -10,7 +10,7 @@
 
 ## Установка
 
-Скачайте файл пакета на Wiren Board и установите с помощью dpkg:
+Скачайте файл пакета на Wiren Board и установите с помощью dpkg одной командой:
 
 #### Wirenboard 8
 
@@ -25,6 +25,8 @@ dpkg -i wb-skirell-fluxa_arm64.deb && rm wb-skirell-fluxa_arm64.deb
 wget https://github.com/wirenboard-dev/wb-skirell-fluxa/releases/latest/download/wb-skirell-fluxa_armhf.deb && \
 dpkg -i wb-skirell-fluxa_armhf.deb && rm wb-skirell-fluxa_armhf.deb
 ```
+
+> **Внимание!** После установки будет перезагружен сервис `nginx` для активации всех функций.
 
 ## Удаление
 
